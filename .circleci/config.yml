@@ -40,6 +40,7 @@ jobs:
   unittest:
     executor: standard_cpu
     working_directory: ~/ParlAI
+    parallelism: 4
     steps:
       - checkout
       - setup

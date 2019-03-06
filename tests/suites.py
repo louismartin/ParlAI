@@ -4,6 +4,8 @@
 # This source code is licensed under the MIT license found in the
 # LICENSE file in the root directory of this source tree.
 
+import os
+import sys
 import unittest
 import parlai.core.testing_utils as testing_utils
 
@@ -13,7 +15,6 @@ def _clear_cmdline_args(fn):
     Helper decorator to make sure 'python setup.py test' doesn't look like
     a parlai call.
     """
-    import sys
     sys.argv = sys.argv[:1]
     return fn
 
@@ -51,6 +52,15 @@ def oncommit():
     if any('parlai/mturk' in fn for fn in changed_files):
         # if any mturk stuff changed, run those tests too
         test_suite.addTests(mturk())
+    if testing_utils.is_this_circleci():
+        # we can take advantage of parallelism and split up tests
+        all_tests = test_suite._tests
+        node_index = int(os.environ['CIRCLE_NODE_INDEX'])
+        node_total = int(os.environ['CIRCLE_NODE_TOTAL'])
+        sub_tests = [
+            t for i, t in enumerate(all_tests) if i % node_total == node_index
+        ]
+        test_suite._tests = sub_tests
     return test_suite
 
 
