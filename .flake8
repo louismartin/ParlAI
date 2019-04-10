@@ -4,4 +4,4 @@ extend-ignore =
     C
     E741
 
-max-line-length=88
+max-line-length=120
